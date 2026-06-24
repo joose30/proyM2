@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Predictor CO2 Vehiculos</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;color:#2d3748}
+    header{background:linear-gradient(135deg,#1a365d,#2b6cb0);color:#fff;padding:24px 40px}
+    header h1{font-size:1.6rem} header p{opacity:.85;margin-top:4px}
+    .wrap{max-width:860px;margin:28px auto;padding:0 16px}
+    .card{background:#fff;border-radius:12px;padding:28px 32px;
+          box-shadow:0 2px 12px rgba(0,0,0,.08);margin-bottom:22px}
+    h2{font-size:1.05rem;color:#2b6cb0;margin-bottom:14px;
+       border-bottom:2px solid #bee3f8;padding-bottom:8px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    label{display:block;font-size:.83rem;font-weight:600;color:#4a5568;margin-bottom:4px}
+    input,select{width:100%;padding:9px 12px;border:1px solid #cbd5e0;
+      border-radius:8px;font-size:.93rem}
+    input:focus,select:focus{outline:none;border-color:#3182ce}
+    .btn{display:block;width:100%;padding:13px;margin-top:20px;
+      background:linear-gradient(135deg,#2b6cb0,#3182ce);color:#fff;
+      border:none;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer}
+    .btn:hover{opacity:.9}
+    .res{border-radius:12px;padding:24px;text-align:center;margin-bottom:22px}
+    .bajo{background:#c6f6d5;border:2px solid #38a169}
+    .mod{background:#fefcbf;border:2px solid #d69e2e}
+    .alto{background:#fed7d7;border:2px solid #e53e3e}
+    .muy{background:#feb2b2;border:2px solid #c53030}
+    .val{font-size:3rem;font-weight:800;color:#1a365d}
+    .unit{color:#4a5568;margin-top:4px}
+    .niv{font-size:1.1rem;font-weight:600;margin-top:8px}
+    .err{background:#fed7d7;border:2px solid #e53e3e;border-radius:8px;
+      padding:14px 18px;color:#c53030;margin-bottom:16px}
+    footer{text-align:center;color:#718096;font-size:.82rem;padding:12px}
+  </style>
+</head>
+<body>
+<header>
+  <h1>Predictor de Emisiones de CO2 — Vehiculos Canada</h1>
+  <p>Ingresa las caracteristicas del vehiculo para estimar sus emisiones en g/km</p>
+</header>
+<div class="wrap">
+{% if prediccion %}
+  {% set cls = "bajo" if prediccion < 150 else ("mod" if prediccion < 250 else ("alto" if prediccion < 350 else "muy")) %}
+  <div class="card res {{ cls }}">
+    <div class="val">{{ prediccion }}</div>
+    <div class="unit">gramos de CO2 por kilometro (g/km)</div>
+    <div class="niv">Nivel: {{ nivel }}</div>
+  </div>
+{% endif %}
+{% if error %}<div class="err">Error: {{ error }}</div>{% endif %}
+<div class="card">
+  <h2>Caracteristicas del Vehiculo</h2>
+  <form action="/predict" method="POST">
+    <div class="grid">
+      <div><label>Marca</label>
+        <select name="Make" required>
+          {% for m in makes %}<option value="{{ m }}">{{ m }}</option>{% endfor %}
+        </select></div>
+      <div><label>Clase de vehiculo</label>
+        <select name="Vehicle_Class" required>
+          {% for c in classes %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+        </select></div>
+      <div><label>Transmision</label>
+        <select name="Transmission" required>
+          {% for t in transmissions %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
+        </select></div>
+      <div><label>Tipo de combustible</label>
+        <select name="Fuel_Type" required>
+          {% for code, label in fuel_options %}<option value="{{ code }}">{{ label }}</option>{% endfor %}
+        </select></div>
+      <div><label>Motor (L)</label>
+        <input type="number" name="Engine_Size" step="0.1" min="0.6" max="8.4" placeholder="Ej: 2.0" required></div>
+      <div><label>Cilindros</label>
+        <input type="number" name="Cylinders" min="2" max="16" placeholder="Ej: 4" required></div>
+      <div><label>Consumo ciudad (L/100 km)</label>
+        <input type="number" name="Fuel_City" step="0.1" min="2" max="30" placeholder="Ej: 9.5" required></div>
+      <div><label>Consumo carretera (L/100 km)</label>
+        <input type="number" name="Fuel_Hwy" step="0.1" min="2" max="25" placeholder="Ej: 7.0" required></div>
+      <div><label>Consumo combinado (L/100 km)</label>
+        <input type="number" name="Fuel_Comb" step="0.1" min="2" max="27" placeholder="Ej: 8.4" required></div>
+      <div><label>Consumo combinado (mpg)</label>
+        <input type="number" name="Fuel_mpg" min="8" max="99" placeholder="Ej: 34" required></div>
+    </div>
+    <button type="submit" class="btn">Predecir Emisiones de CO2</button>
+  </form>
+</div>
+<footer>Proyecto CRISP-DM · Regresion · Dataset: CO2 Emission by Vehicles (Canada)</footer>
+</div>
+</body>
+</html>
